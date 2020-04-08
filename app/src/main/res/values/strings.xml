@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">俺のおみくじ</string>
+    <string name="bt_action">振ってみ〜や〜</string>
+    <string name="contents1">良縁に恵まれるよ〜！！</string>
+    <string name="contents2">今日はお金もらえるかもよ！！w</string>
+    <string name="contents3">気分は上々！！</string>
+    <string name="contents4">お金もらえるかもけど、無駄使いすんなよ！！</string>
+    <string name="contents5">恋愛は心がけ次第っしょ</string>
+    <string name="contents6">健康は・・・普通だな、うん</string>
+    <string name="contents7">ボランティアでもしてみたら？</string>
+    <string name="contents8">今日は我慢の日だな</string>
+    <string name="contents9">寝不足注意！！</string>
+</resources>
