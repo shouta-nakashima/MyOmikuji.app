@@ -1,13 +1,62 @@
 package jp.mac.nikkeibp.MyOmikuji
 
+import android.content.Context
+import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Vibrator
+import android.preference.PreferenceManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.fortune.*
 import kotlinx.android.synthetic.main.omikuji.*
 
-class MyOmikujiActivity : AppCompatActivity() {
+class MyOmikujiActivity : AppCompatActivity(), SensorEventListener {
+
+    lateinit var vibrator: Vibrator
+
+    override fun onPause() {
+        super.onPause()
+        manager.unregisterListener(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    lateinit var manager: SensorManager
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//
+//        val toast = Toast.makeText(this, item?.title, Toast.LENGTH_LONG)
+//        toast.show()
+
+        if (item?.itemId == R.id.item1) {
+            val intent = Intent(this, OmikujiPreferenceActivity::class.java)
+            startActivity(intent)
+        }
+        else {
+            val intent = Intent(this, AboutActivity::class.java)
+            startActivity(intent)
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
 
     //おみくじ棚の配列
     val omikujiShelf = Array<OmikujiParts>(20)
@@ -23,6 +72,16 @@ class MyOmikujiActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.omikuji)
+
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        manager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        val pref = PreferenceManager.getDefaultSharedPreferences(this)
+        val value = pref.getBoolean("button", false)
+
+        button.visibility = if (value) View.VISIBLE else View.INVISIBLE
+
 
         omikujiBox.omikujiView = imageView
 
@@ -88,9 +147,31 @@ class MyOmikujiActivity : AppCompatActivity() {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event?.action == MotionEvent.ACTION_DOWN){
             if (omikujiNumber < 0 && omikujiBox.finish) {
+                val pref = PreferenceManager.getDefaultSharedPreferences(this)
+                if (pref.getBoolean("vibration", false)) {
+                    vibrator.vibrate(50L)
+                }
                 drawResult()
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+
+        if (omikujiBox.chkShake(event)) {
+            if (omikujiNumber < 0) {
+                omikujiBox.shake()
+            }
+        }
+//        val value = event?.values?.get(0)
+//        if (value != null && 10 < value) {
+//            val toast = Toast.makeText(this, "加速度 : ${value}", Toast.LENGTH_LONG)
+//            toast.show()
+//        }
     }
 }
